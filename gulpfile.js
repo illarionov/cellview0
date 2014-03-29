@@ -3,6 +3,7 @@
 
 var gulp = require('gulp');
 var open = require('open');
+var print = require('gulp-print');
 var wiredep = require('wiredep').stream;
 
 // Load plugins
