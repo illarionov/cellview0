@@ -3,7 +3,6 @@
 
 var gulp = require('gulp');
 var open = require('open');
-var print = require('gulp-print');
 var wiredep = require('wiredep').stream;
 
 // Load plugins
@@ -17,9 +16,16 @@ gulp.task('styles', function () {
         .pipe($.size());
 });
 
+gulp.task('typescripts', function() {
+    return gulp.src(['app/scripts/**/*.ts'])
+        .pipe($.tsc())
+        .pipe(gulp.dest('app/typescript'))
+        .pipe($.size());
+});
+
 // Scripts
-gulp.task('scripts', function () {
-    return gulp.src(['app/scripts/**/*.js'])
+gulp.task('scripts', ['typescripts'], function () {
+    return gulp.src(['app/scripts/**/*.js', 'app/typescript/**/*.js'])
         .pipe($.jshint('.jshintrc'))
         .pipe($.jshint.reporter('default'))
         .pipe($.size());
@@ -27,7 +33,7 @@ gulp.task('scripts', function () {
 
 // HTML
 gulp.task('html', ['styles', 'scripts'], function () {
-    var jsFilter = $.filter('**/*.js');
+    var jsFilter = $.filter(['**/*.js']);
     var cssFilter = $.filter('**/*.css');
 
     return gulp.src('app/*.html')
@@ -60,7 +66,7 @@ gulp.task('images', function () {
 
 // Clean
 gulp.task('clean', function () {
-    return gulp.src(['dist/styles', 'dist/scripts', 'dist/images'], { read: false }).pipe($.clean());
+    return gulp.src(['dist/styles', 'app/typescript', 'dist/scripts', 'dist/images'], { read: false }).pipe($.clean());
 });
 
 // Build
@@ -107,6 +113,7 @@ gulp.task('watch', ['connect', 'serve'], function () {
         'app/*.html',
         'app/styles/**/*.css',
         'app/scripts/**/*.js',
+        'app/scripts/**/*.ts',
         'app/images/**/*'
     ], function (event) {
     	console.log('reload');
@@ -119,6 +126,9 @@ gulp.task('watch', ['connect', 'serve'], function () {
 
     // Watch .js files
     gulp.watch('app/scripts/**/*.js', ['scripts']);
+
+    // Watch .ts files
+    gulp.watch('app/scripts/**/*.ts', ['scripts']);
 
     // Watch image files
     gulp.watch('app/images/**/*', ['images']);
