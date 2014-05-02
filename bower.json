@@ -4,7 +4,8 @@
   "dependencies": {
     "jquery": "~2.1.0",
     "bootflatv2": "*",
-    "leaflet-sidebar": "~0.1.4"
+    "leaflet-sidebar": "~0.1.5",
+    "leaflet-0.7.2.zip": "http://leaflet-cdn.s3.amazonaws.com/build/leaflet-0.7.2.zip"
   },
   "devDependencies": {
     "dt-jquery2": "*"
