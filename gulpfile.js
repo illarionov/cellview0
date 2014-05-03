@@ -16,16 +16,16 @@ gulp.task('styles', function () {
         .pipe($.size());
 });
 
-gulp.task('typescripts', function() {
-    return gulp.src(['app/scripts/**/*.ts'])
-        .pipe($.tsc())
-        .pipe(gulp.dest('app/typescript'))
-        .pipe($.size());
+gulp.task('coffee', function() {
+    return gulp.src(['app/scripts/**/*.coffee'])
+        .pipe($.coffee({bare: true}).on('error', $.util.log))
+        .pipe(gulp.dest('.tmp/coffee/'))
+        .pipe($.size())
 });
 
 // Scripts
-gulp.task('scripts', ['typescripts'], function () {
-    return gulp.src(['app/scripts/**/*.js', 'app/typescript/**/*.js'])
+gulp.task('scripts', ['coffee'], function () {
+    return gulp.src(['app/scripts/**/*.js', '.tmp/coffee/**/*.js'])
         .pipe($.jshint('.jshintrc'))
         .pipe($.jshint.reporter('default'))
         .pipe($.size());
@@ -66,7 +66,7 @@ gulp.task('images', function () {
 
 // Clean
 gulp.task('clean', function () {
-    return gulp.src(['dist/styles', 'app/typescript', 'dist/scripts', 'dist/images'], { read: false }).pipe($.clean());
+    return gulp.src(['dist/styles', '.tmp/coffee', 'dist/scripts', 'dist/images'], { read: false }).pipe($.clean());
 });
 
 // Build
@@ -113,7 +113,7 @@ gulp.task('watch', ['connect', 'serve'], function () {
         'app/*.html',
         'app/styles/**/*.css',
         'app/scripts/**/*.js',
-        'app/scripts/**/*.ts',
+        'app/scripts/**/*.coffee',
         'app/images/**/*'
     ], function (event) {
     	console.log('reload');
@@ -127,8 +127,8 @@ gulp.task('watch', ['connect', 'serve'], function () {
     // Watch .js files
     gulp.watch('app/scripts/**/*.js', ['scripts']);
 
-    // Watch .ts files
-    gulp.watch('app/scripts/**/*.ts', ['scripts']);
+    // Watch .coffee files
+    gulp.watch('app/scripts/**/*.coffee', ['scripts']);
 
     // Watch image files
     gulp.watch('app/images/**/*', ['images']);

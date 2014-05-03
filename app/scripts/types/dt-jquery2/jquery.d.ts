@@ -1,1 +1,0 @@
-/home/alexey/WebstormProjects/cellview4/app/bower_components/dt-jquery2/jquery.d.ts
