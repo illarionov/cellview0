@@ -41,7 +41,7 @@ define [
       h = {}
       h['mcc'] = @selectMcc.selectedVal() if @selectMcc.selectedVal()
       h['mnc'] = @selectMnc.selectedVal() if @selectMnc.selectedVal()
-      h['radio'] = @selectRadio.selectedVal() if @selectRadio.selectedVal()
+      h['network_radio'] = @selectRadio.selectedVal() if @selectRadio.selectedVal()
       h['lac'] = @selectLac.selectedVal() if @selectLac.selectedVal()
       # XXX h['rnc'] = @selectRnc.selectedVal() if @selectRnc.selectedVal()
       h['psc'] = @selectPsc.selectedVal() if @selectPsc.selectedVal()
@@ -194,41 +194,25 @@ define [
       else
         return mnc
 
-    _grepMcc: (cells) ->
+    _grepInt: (cells, name, val) ->
       if not cells
         throw new Error "cells not defined"
-      mcc = @selectMcc.selectedVal()
-      if not mcc
+      if not val
         return cells
-      mcc = parseInt(mcc)
-      list = cellInfo for cellInfo in cells when cellInfo['mcc'] is mcc
+      valInt = parseInt(val)
+      list = cellInfo for cellInfo in cells when cellInfo[name] is valInt
+
+    _grepMcc: (cells) ->
+      @_grepInt(cells, 'mcc', @selectMcc.selectedVal())
 
     _grepMnc: (cells) ->
-      if not cells
-        throw new Error "cells not defined"
-      mnc = @selectMnc.selectedVal()
-      if not mnc
-        return cells
-      mnc = parseInt(mnc)
-      list = cellInfo for cellInfo in cells when +cellInfo['mnc'] is mnc
+      @_grepInt(cells, 'mnc', @selectMnc.selectedVal())
 
     _grepLac: (cells) ->
-      if not cells
-        throw new Error "cells not defined"
-      lac = @selectLac.selectedVal()
-      if not lac
-        return cells
-      lac = parseInt(lac)
-      list = cellInfo for cellInfo in cells when cellInfo['lac'] == lac
+      @_grepInt(cells, 'lac', @selectLac.selectedVal())
 
     _grepPsc: (cells) ->
-      if not cells
-        throw new Error "cells not defined"
-      psc = @selectPsc.selectedVal()
-      if not psc
-        return cells
-      psc = parseInt(psc)
-      list = cellInfo for cellInfo in cells when cellInfo['psc'] == psc
+      @_grepInt(cells, 'psc', @selectPsc.selectedVal())
 
     _grepRadio: (cells) ->
       if not cells

@@ -2,10 +2,10 @@ define [
   'jquery'
   'leaflet',
   'leaflet-sidebar',
-  'Constants'
-], ($, L, leafletSidebar, Constants) ->
+  'Constants',
+  'CoverageLayer'
+], ($, L, leafletSidebar, Constants, CoverageLayer) ->
   class MapView
-
 
     constructor: ->
       @leafletMap = L.map "map", {
@@ -18,6 +18,9 @@ define [
         maxZoom: 18,
         attribution: 'Map data © <a href="http://www.openstreetmap.org">OpenStreetMap contributors</a>'
       }).addTo(@leafletMap)
+
+      @coverageLayer = new CoverageLayer()
+      @coverageLayer.addTo(@leafletMap)
 
       @sidebar = L.control.sidebar('sidebar', {
         position: 'right',
