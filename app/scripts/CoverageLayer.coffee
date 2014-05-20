@@ -22,10 +22,12 @@ define [
 
     initialize: (options, data=[])->
       @_data = data
+      @_sortData()
       L.setOptions(this, options)
 
     setData: (data=[]) ->
       @_data = data
+      @_sortData()
       @redraw()
 
     redraw: ->
@@ -112,6 +114,10 @@ define [
       a = @_colorGradientData[idx+3]
       return "rgba(#{r},#{g},#{b},#{a/255.0})"
 
+    _sortData: ->
+      @_data.sort (a,b) ->
+        return a[2] - b[2]
+
     _redraw: ->
       gridSize = @options?.gridSize || @defaultGridSize
       size = @_map.getSize()
@@ -129,11 +135,15 @@ define [
       ctx.mozImageSmoothingEnabled = false
       ctx.clearRect(0, 0, @_canvas.width, @_canvas.height)
 
+      lastSignal = 0
+      ctx.fillStyle = @_getColor(lastSignal)
+
       for latLng in @_data
         continue if not bounds.contains(latLng)
         p = @_map.latLngToContainerPoint(latLng)
-        ctx.fillStyle = @_getColor(latLng[2])
+        if lastSignal != latLng[2]
+          lastSignal = latLng[2]
+          ctx.fillStyle = @_getColor(lastSignal)
         ctx.fillRect(p.x-gridSize/2, p.y-gridSize/2, gridSize, gridSize)
-        # ctx.drawImage(drawRect, p.x-gridSize/2, p.y-gridSize/2)
 
       @_frame = null
