@@ -43,7 +43,7 @@ define [
       h['mnc'] = @selectMnc.selectedVal() if @selectMnc.selectedVal()
       h['network_radio'] = @selectRadio.selectedVal() if @selectRadio.selectedVal()
       h['lac'] = @selectLac.selectedVal() if @selectLac.selectedVal()
-      # XXX h['rnc'] = @selectRnc.selectedVal() if @selectRnc.selectedVal()
+      h['rnc'] = @selectRnc.selectedVal() if @selectRnc.selectedVal()
       h['psc'] = @selectPsc.selectedVal() if @selectPsc.selectedVal()
       h['cid'] = @selectCid.selectedVal() if @selectCid.selectedVal()
       h

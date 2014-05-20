@@ -10,7 +10,6 @@ require.config
     requirejs: '../../bower_components/requirejs/require'
     quadtree: '../../js_components/QuadTree'
 
-
   shim:
     'leaflet-sidebar':
       deps: [ 'leaflet' ]

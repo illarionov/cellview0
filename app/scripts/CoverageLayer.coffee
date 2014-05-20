@@ -10,14 +10,16 @@ class CoverageLayer
 
 define [
   'leaflet',
-  'quadtree'
-], (L, QuadTree) ->
+  'quadtree',
+  'SignalGradient'
+], (L, QuadTree, SignalGradient) ->
   class CoverageLayer extends L.Class
     constructor: ->
       @defaultGridSize = 51
       @_canvas =  null
       @_frame =  null
       @_map = null
+      @signalGradient = new SignalGradient()
       @_data = []
 
     initialize: (options, data=[])->
@@ -28,7 +30,6 @@ define [
     setData: (data=[]) ->
       @_data = data
       @_sortData()
-      @_startLoad = false
       @redraw()
 
     redraw: ->
@@ -84,37 +85,6 @@ define [
       @_canvas.style[L.DomUtil.TRANSFORM] = L.DomUtil.getTranslateString(offset) + " scale(#{scale})"
       this
 
-    _getColor: (signal)  ->
-      if not @_colorGradientData?
-        gradContainer = document.createElement('canvas')
-        gradContainer.width = -40-(-120)
-        gradContainer.height = 1
-        ctx = gradContainer.getContext('2d')
-        grad = ctx.createLinearGradient(0, 0, gradContainer.width, gradContainer.height)
-        grad.addColorStop(0/7, 'rgba(56, 56, 56, 0.7)')
-        grad.addColorStop(1/7, 'rgba(100, 100, 100, 0.7)')
-        grad.addColorStop(2/7, 'rgba(20, 10, 120, 0.7)')
-        grad.addColorStop(3/7, 'rgba(0, 120, 240, 0.7)')
-        grad.addColorStop(4/7, 'rgba(0, 255, 0, 0.7)')
-        grad.addColorStop(5/7, 'rgba(255, 255, 0, 0.7)')
-        grad.addColorStop(6/7, 'rgba(255, 120, 20, 0.7)')
-        grad.addColorStop(7/7, 'rgba(255, 0, 0, 0.7)')
-        ctx.fillStyle = grad
-        ctx.fillRect(0, 0, gradContainer.width, gradContainer.height)
-        @_colorGradientData = ctx.getImageData(0, 0, gradContainer.width, gradContainer.height).data
-
-      if signal < -120
-        return 'rgba(56, 56, 56, 0.7)'
-      if signal > -40
-        return 'rgba(255, 0, 0, 0.7)'
-
-      idx = 4 * (signal + 120)
-      r = @_colorGradientData[idx]
-      g = @_colorGradientData[idx+1]
-      b = @_colorGradientData[idx+2]
-      a = @_colorGradientData[idx+3]
-      return "rgba(#{r},#{g},#{b},#{a/255.0})"
-
     _sortData: ->
       @_data.sort (a,b) ->
         return a[2] - b[2]
@@ -133,18 +103,20 @@ define [
         @_map.containerPointToLatLng(size.add([gridSize, gridSize])))
 
       ctx = @_canvas.getContext('2d')
-      ctx.mozImageSmoothingEnabled = false
       ctx.clearRect(0, 0, @_canvas.width, @_canvas.height)
 
-      lastSignal = 0
-      ctx.fillStyle = @_getColor(lastSignal)
+      if @_data.length > 0
+        lastSignal = @_data[0][2]
+      else
+        lastSignal = 0
+      ctx.fillStyle = @signalGradient.getColor(lastSignal)
 
       for latLng in @_data
         continue if not bounds.contains(latLng)
         p = @_map.latLngToContainerPoint(latLng)
         if lastSignal != latLng[2]
           lastSignal = latLng[2]
-          ctx.fillStyle = @_getColor(lastSignal)
+          ctx.fillStyle = @signalGradient.getColor(lastSignal)
         ctx.fillRect(p.x-gridSize/2, p.y-gridSize/2, gridSize, gridSize)
 
       @_frame = null
