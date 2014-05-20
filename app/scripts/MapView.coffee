@@ -3,11 +3,14 @@ define [
   'leaflet',
   'leaflet-sidebar',
   'Constants',
-  'CoverageLayer'
-], ($, L, leafletSidebar, Constants, CoverageLayer) ->
+  'CoverageLayer',
+  'spinjs'
+  'leaflet-spin'
+], ($, L, leafletSidebar, Constants, CoverageLayer, Spinner, LeafletSpin) ->
   class MapView
 
     constructor: ->
+      window.Spinner = Spinner
       @leafletMap = L.map "map", {
         center: Constants.MAP_DEFAULT_CENTER,
         zoom: Constants.MAP_DEFAULT_ZOOM
@@ -25,16 +28,19 @@ define [
       @sidebar = L.control.sidebar('sidebar', {
         position: 'right',
         closeButton: true,
-        autopan: false
+        autoPan: false
       })
 
       @leafletMap.addControl @sidebar
 
-      setTimeout(=>
-        @sidebar.show()
-      , 500)
-
       $(".nav .btn_toggle_sidebar:first").click(() =>
         @sidebar.toggle()
       )
+
+    spin: (doSpin) ->
+      @leafletMap.spin(doSpin,
+        top: '80%'
+        left: '45%'
+      )
+
   return MapView

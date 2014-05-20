@@ -28,6 +28,7 @@ define [
     setData: (data=[]) ->
       @_data = data
       @_sortData()
+      @_startLoad = false
       @redraw()
 
     redraw: ->

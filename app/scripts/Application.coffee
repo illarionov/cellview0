@@ -11,24 +11,33 @@ define [
       @mapView = new MapView()
       @formController = new CellsFormController($("#sidebar"))
       @formController.setOnFormChangedListener (controller) =>
-        description = controller.getDescription()
-        $(".description:first").text description
-        @updateCoverageLayer controller.getRequestHash()
+        @updateCoverageLayer(controller.getRequestHash(), controller.getDescription())
         this
 
       @formController.loadData()
       #XXX: default url
-      # @updateCoverageLayer({})
 
-    updateCoverageLayer: (request) ->
+      setTimeout( =>
+        @mapView.sidebar.show()
+        @updateCoverageLayer({})
+      , 500)
+
+
+    updateCoverageLayer: (request, description) ->
+      @mapView.spin true
+      $(".description:first").text description
+      coverageData = []
       $.ajax
         dataType: "json"
         url: Constants.API_COVERAGE_URL
         data: request
-        success: (data, textStatus, jqXHR) =>
-          @mapView.coverageLayer.setData data
+        success: (data, textStatus, jqXHR) ->
+          coverageData = data
         error: (jqXHR, textStatus, errorThrown) ->
           alert(textStatus)
+        complete: =>
+          @mapView.spin(false)
+          @mapView.coverageLayer.setData coverageData
 
   $ ->
     app = new Application()
