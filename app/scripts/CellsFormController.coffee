@@ -77,6 +77,7 @@ define [
       @selectRnc.setSelectedVal(req['rnc'])
       @selectPsc.setSelectedVal(req['psc'])
       @selectCid.setSelectedVal(req['cid'])
+      @_refresh()
 
     _onSelectionChanged : (eventObject) =>
       @_refresh()
