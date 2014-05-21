@@ -106,6 +106,32 @@ input[type="radio"], input[type="checkbox"] {
     top: 5px;
     background: transparent;
 }
+
+.leaflet-right {
+    transition: right 0.1s;
+}
+
+.leaflet-sidebar.left {
+    transition: left 0.1s, width 0.1s;
+}
+
+.leaflet-sidebar.right {
+    transition: right 0.1s, width 0.1s;
+    padding-left: 0;
+}
+
+.info {
+    background: none repeat scroll 0 0 rgba(255, 255, 255, 1);
+    border-radius: 5px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    font: 14px/18px Arial,Helvetica,sans-serif;
+    padding: 6px 8px;
+}
+
+.legend {
+    padding-top: 10px;
+}
+
 @media (max-width: 992px) {
     .navbar .navbar-brand {
         font-size: 18px;
@@ -120,6 +146,21 @@ input[type="radio"], input[type="checkbox"] {
         hyphens: auto;
     }
 }
+
+@media(min-width:1200px){
+    .leaflet-sidebar {
+        width: 310px;
+    }
+
+    .leaflet-sidebar.left.visible ~ .leaflet-left {
+        left: 310px;
+    }
+
+    .leaflet-sidebar.right.visible ~ .leaflet-right {
+        right: 310px;
+    }
+}
+
 /* Print Handling */
 @media print {
     .navbar {

@@ -5,14 +5,12 @@
 # Leaflet.heat, a tiny and fast heatmap plugin for Leaflet.
 # https://github.com/Leaflet/Leaflet.heat
 #
-
-class CoverageLayer
-
 define [
   'leaflet',
   'quadtree',
   'SignalGradient'
 ], (L, QuadTree, SignalGradient) ->
+  "use strict"
   class CoverageLayer extends L.Class
     constructor: ->
       @defaultGridSize = 51

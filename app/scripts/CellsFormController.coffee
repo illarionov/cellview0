@@ -5,6 +5,7 @@ define [
   'Constants',
   'CellsFormSelect'
 ], ($, L, leafletSidebar, Constants, CellsFormSelect) ->
+  "use strict"
   class CellsFormController
     constructor: (rootDiv) ->
       throw new Error("rootDiv undefined") if not rootDiv?

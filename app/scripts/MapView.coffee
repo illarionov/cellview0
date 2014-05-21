@@ -7,40 +7,62 @@ define [
   'spinjs'
   'leaflet-spin'
 ], ($, L, leafletSidebar, Constants, CoverageLayer, Spinner, LeafletSpin) ->
+  "use strict"
   class MapView
 
     constructor: ->
       window.Spinner = Spinner
+
       @leafletMap = L.map "map", {
         center: Constants.MAP_DEFAULT_CENTER,
         zoom: Constants.MAP_DEFAULT_ZOOM
       }
 
-      new L.tileLayer(Constants.MAPBOX_LAYER_URI, {
-        minZoom: 0,
-        maxZoom: 18,
-        attribution: 'Map data © <a href="http://www.openstreetmap.org">OpenStreetMap contributors</a>'
-      }).addTo(@leafletMap)
-
-      @coverageLayer = new CoverageLayer()
-      @coverageLayer.addTo(@leafletMap)
-
-      @sidebar = L.control.sidebar('sidebar', {
-        position: 'right',
-        closeButton: true,
-        autoPan: false
-      })
-
-      @leafletMap.addControl @sidebar
-
-      $(".nav .btn_toggle_sidebar:first").click(() =>
-        @sidebar.toggle()
-      )
+      @_initMainLayers()
+      @_initCoverageLayer()
+      @_initSidebar()
+      @_initLegend()
 
     spin: (doSpin) ->
       @leafletMap.spin(doSpin,
         top: '80%'
         left: '45%'
       )
+
+    _initMainLayers: ->
+      new L.tileLayer(Constants.MAPBOX_LAYER_URI, {
+        minZoom: 0,
+        maxZoom: 18,
+        attribution: 'Map data © <a href="http://www.openstreetmap.org">OpenStreetMap contributors</a>'
+      }).addTo(@leafletMap)
+
+    _initCoverageLayer: ->
+      @coverageLayer = new CoverageLayer()
+      @coverageLayer.addTo(@leafletMap)
+
+    _initSidebar: ->
+      @sidebar = L.control.sidebar('sidebar', {
+        position: 'right',
+        closeButton: true,
+        autoPan: false
+      })
+      @leafletMap.addControl @sidebar
+
+    _initLegend: ->
+      @legend = L.control(
+        position: 'bottomleft'
+      )
+      @legend.onAdd = (map) ->
+        this._canvas = L.DomUtil.create('canvas', 'info legend')
+        #XXX: css
+        this._canvas.width = 350
+        this._canvas.height = 25
+
+        this.update()
+        return this._canvas
+      @legend.update = (props) =>
+        @coverageLayer.signalGradient.drawLegend(@legend._canvas)
+      @legend.addTo(@leafletMap)
+
 
   return MapView

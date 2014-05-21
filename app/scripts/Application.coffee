@@ -5,15 +5,16 @@ define [
     'jquery',
     'leaflet'
   ], (Constants, CellsFormController, MapView, $, L) ->
-  'use strict'
+  "use strict"
   class Application
     constructor: ->
       @mapView = new MapView()
+      $(".nav .btn_toggle_sidebar:first").click => @mapView.sidebar.toggle()
+
       @formController = new CellsFormController($("#sidebar"))
       @formController.setOnFormChangedListener (controller) =>
         @updateCoverageLayer(controller.getRequestHash(), controller.getDescription())
         this
-
       @formController.loadData()
       #XXX: default url
 
@@ -21,7 +22,6 @@ define [
         @mapView.sidebar.show()
         @updateCoverageLayer({})
       , 500)
-
 
     updateCoverageLayer: (request, description) ->
       @mapView.spin true
