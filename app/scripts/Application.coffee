@@ -15,13 +15,16 @@ define [
       @formController.setOnFormChangedListener (controller) =>
         @updateCoverageLayer(controller.getRequestHash(), controller.getDescription())
         this
-      @formController.loadData()
-      #XXX: default url
 
-      setTimeout( =>
-        @mapView.sidebar.show()
-        @updateCoverageLayer({})
-      , 500)
+      @formController.setOnDataLoadedListener (controller) =>
+        controller.setRequestHash(Constants.DEFAULT_COVERAGE_FORM)
+        @updateCoverageLayer(controller.getRequestHash(), controller.getDescription())
+        setTimeout( =>
+          @mapView.sidebar.show()
+        , 100)
+        this
+
+      @formController.loadData()
 
     updateCoverageLayer: (request, description) ->
       @mapView.spin true

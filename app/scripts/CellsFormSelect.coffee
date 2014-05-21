@@ -11,12 +11,19 @@ define [
       @values = hash
       @refresh()
 
-    selectedVal: ->
+    getSelectedVal: ->
       v = @select.find('option:selected').val()
       if v == ""
         return null
       else
         return v
+
+    setSelectedVal: (key) ->
+      if not key
+        key = ""
+      else
+        key = "" if not @values[key]
+      @select.val(key)
 
     refresh: ->
       selected = @select.find('option:selected').val()

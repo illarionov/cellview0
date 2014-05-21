@@ -20,3 +20,8 @@ define [
       7: 'Smarts'
       39: 'Rostelecom'
       99: 'Beeline'
+
+    @DEFAULT_COVERAGE_FORM:
+      mcc: 250
+      mnc: 99
+      network_radio: 'umts'

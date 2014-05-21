@@ -30,52 +30,63 @@ define [
           @cells = data
         error: (jqXHR, textStatus, errorThrown) ->
           alert(textStatus)
-        complete: =>
-          @_setStatusLoadingCellList(false)
+        complete: (jqXHR, textStatus) =>
           @_refresh()
-
+          @_notifyDataLoaded() if textStatus == "success" || textStatus == "notmodified"
 
     setOnFormChangedListener: (listener) ->
-      @listeners.push listener
+      @listeners.push { 'cb': listener, 'item': 'onFormChanged' }
+
+    setOnDataLoadedListener: (listener) ->
+      @listeners.push { 'cb': listener, 'item': 'onDataLoaded' }
 
     getRequestHash: ->
       h = {}
-      h['mcc'] = @selectMcc.selectedVal() if @selectMcc.selectedVal()
-      h['mnc'] = @selectMnc.selectedVal() if @selectMnc.selectedVal()
-      h['network_radio'] = @selectRadio.selectedVal() if @selectRadio.selectedVal()
-      h['lac'] = @selectLac.selectedVal() if @selectLac.selectedVal()
-      h['rnc'] = @selectRnc.selectedVal() if @selectRnc.selectedVal()
-      h['psc'] = @selectPsc.selectedVal() if @selectPsc.selectedVal()
-      h['cid'] = @selectCid.selectedVal() if @selectCid.selectedVal()
+      h['mcc'] = @selectMcc.getSelectedVal() if @selectMcc.getSelectedVal()
+      h['mnc'] = @selectMnc.getSelectedVal() if @selectMnc.getSelectedVal()
+      h['network_radio'] = @selectRadio.getSelectedVal() if @selectRadio.getSelectedVal()
+      h['lac'] = @selectLac.getSelectedVal() if @selectLac.getSelectedVal()
+      h['rnc'] = @selectRnc.getSelectedVal() if @selectRnc.getSelectedVal()
+      h['psc'] = @selectPsc.getSelectedVal() if @selectPsc.getSelectedVal()
+      h['cid'] = @selectCid.getSelectedVal() if @selectCid.getSelectedVal()
       h
 
     getDescription: ->
       description = []
-      mcc = @selectMcc.selectedVal()
+      mcc = @selectMcc.getSelectedVal()
       if mcc then description.push("mcc: " + CellsFormController.getMccDescription mcc)
-      mnc = @selectMnc.selectedVal()
+      mnc = @selectMnc.getSelectedVal()
       if mnc then description.push("mnc: " + CellsFormController.getMncDescription mnc)
-      radio = @selectRadio.selectedVal()
+      radio = @selectRadio.getSelectedVal()
       if radio then description.push "radio: #{radio}"
-      lac = @selectLac.selectedVal()
+      lac = @selectLac.getSelectedVal()
       if lac then description.push "lac: #{lac}"
-      rnc = @selectRnc.selectedVal()
+      rnc = @selectRnc.getSelectedVal()
       if rnc then description.push "rnc: #{rnc}"
-      psc = @selectPsc.selectedVal()
+      psc = @selectPsc.getSelectedVal()
       if psc then description.push "psc: #{psc}"
-      cid = @selectCid.selectedVal()
+      cid = @selectCid.getSelectedVal()
       if cid then description.push "cid: #{cid}"
       description.join(', ')
+
+    setRequestHash: (req) ->
+      @selectMcc.setSelectedVal(req['mcc'])
+      @selectMnc.setSelectedVal(req['mnc'])
+      @selectRadio.setSelectedVal(req['network_radio'])
+      @selectLac.setSelectedVal(req['lac'])
+      @selectRnc.setSelectedVal(req['rnc'])
+      @selectPsc.setSelectedVal(req['psc'])
+      @selectCid.setSelectedVal(req['cid'])
 
     _onSelectionChanged : (eventObject) =>
       @_refresh()
       @_notifyOnFormChanged()
 
     _notifyOnFormChanged: ->
-      listener(this) for listener in @listeners
+      listener.cb(this) for listener in @listeners when listener['item'] is 'onFormChanged'
 
-    _setStatusLoadingCellList: (isLoading) ->
-      @selectElements.prop('disabled', isLoading)
+    _notifyDataLoaded: ->
+      listener.cb(this) for listener in @listeners when listener['item'] is 'onDataLoaded'
 
     _getCellListUrl: -> Constants.API_CELLS_URL
 
@@ -201,33 +212,33 @@ define [
       if not val
         return cells
       valInt = parseInt(val)
-      list = cellInfo for cellInfo in cells when cellInfo[name] is valInt
+      cellInfo for cellInfo in cells when cellInfo[name] is valInt
 
     _grepMcc: (cells) ->
-      @_grepInt(cells, 'mcc', @selectMcc.selectedVal())
+      @_grepInt(cells, 'mcc', @selectMcc.getSelectedVal())
 
     _grepMnc: (cells) ->
-      @_grepInt(cells, 'mnc', @selectMnc.selectedVal())
+      @_grepInt(cells, 'mnc', @selectMnc.getSelectedVal())
 
     _grepLac: (cells) ->
-      @_grepInt(cells, 'lac', @selectLac.selectedVal())
+      @_grepInt(cells, 'lac', @selectLac.getSelectedVal())
 
     _grepPsc: (cells) ->
-      @_grepInt(cells, 'psc', @selectPsc.selectedVal())
+      @_grepInt(cells, 'psc', @selectPsc.getSelectedVal())
 
     _grepRadio: (cells) ->
       if not cells
         throw new Error "cells not defined"
-      radio = @selectRadio.selectedVal()
+      radio = @selectRadio.getSelectedVal()
       if not radio
         return cells
-      list = cellInfo for cellInfo in cells when cellInfo['radio'] == radio
+      cellInfo for cellInfo in cells when cellInfo['radio'] == radio
 
     _grepRnc: (cells) ->
       if not cells
         throw new Error "cells not defined"
-      rnc = @selectRnc.selectedVal()
+      rnc = @selectRnc.getSelectedVal()
       if not rnc
         return cells
       rnc = parseInt(rnc)
-      list = cellInfo for cellInfo in cells when cellInfo['cid'] >> 16 == rnc
+      cellInfo for cellInfo in cells when cellInfo['cid'] >> 16 == rnc
