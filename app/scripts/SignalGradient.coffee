@@ -51,7 +51,7 @@ define [], () ->
       ctx.rect(gradMarginLR, 0, gradWidth, gradHeight)
       ctx.fill()
 
-      #ctx.beginPath()
+        #ctx.beginPath()
       #ctx.strokeStyle = '#333333'
       #ctx.lineWidth = 1
       #ctx.rect(gradMarginLR, 0, gradWidth, gradHeight)

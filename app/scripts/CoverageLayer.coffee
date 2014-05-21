@@ -7,8 +7,9 @@
 #
 define [
   'leaflet',
-  'SignalGradient'
-], (L, SignalGradient) ->
+  'quadtree',
+  'SignalGradient',
+], (L, QuadTree, SignalGradient) ->
   "use strict"
   class CoverageLayer extends L.Class
     constructor: ->
@@ -17,16 +18,14 @@ define [
       @_frame =  null
       @_map = null
       @signalGradient = new SignalGradient()
-      @_data = []
+      @_setData([])
 
     initialize: (options, data=[])->
-      @_data = data
-      @_sortData()
+      @_setData data
       L.setOptions(this, options)
 
     setData: (data=[]) ->
-      @_data = data
-      @_sortData()
+      @_setData data
       @redraw()
 
     redraw: ->
@@ -82,9 +81,28 @@ define [
       @_canvas.style[L.DomUtil.TRANSFORM] = L.DomUtil.getTranslateString(offset) + " scale(#{scale})"
       this
 
-    _sortData: ->
-      @_data.sort (a,b) ->
-        return a[2] - b[2]
+    _setData: (data) ->
+      dataBounds = new L.LatLngBounds(data)
+      @_quad = new QuadTree(this._boundsToQuery(dataBounds), false, 6, 6)
+      for point in data
+        @_quad.insert
+          x: point[1]
+          y: point[0]
+          sig: point[2]
+
+    _boundsToQuery: (bounds) ->
+      sw = bounds.getSouthWest()
+      ne = bounds.getNorthEast()
+      if not bounds.getSouthWest()
+        x = y = 0
+        width = height = 0.1
+      else
+        #XXX: wrong
+        x = sw.lng
+        y = sw.lat
+        width = ne.lng - sw.lng
+        height = ne.lat - sw.lat
+      return {'x': x, 'y':y, 'width': width, 'height': height}
 
     _redraw: ->
       gridSize = @options?.gridSize || @defaultGridSize
@@ -102,17 +120,22 @@ define [
       ctx = @_canvas.getContext('2d')
       ctx.clearRect(0, 0, @_canvas.width, @_canvas.height)
 
-      if @_data.length > 0
-        lastSignal = @_data[0][2]
+      points = @_quad.retrieveInBounds(@_boundsToQuery(bounds))
+      #points.sort (a,b) ->
+      #  return a['sig'] - b['sig']
+
+      if points.length > 0
+        lastSignal = points[0]['sig']
       else
         lastSignal = 0
       ctx.fillStyle = @signalGradient.getColor(lastSignal)
 
-      for latLng in @_data
+      for qtP in points
+        latLng = [qtP['y'], qtP['x']]
         continue if not bounds.contains(latLng)
         p = @_map.latLngToContainerPoint(latLng)
-        if lastSignal != latLng[2]
-          lastSignal = latLng[2]
+        if lastSignal != qtP['sig']
+          lastSignal = qtP['sig']
           ctx.fillStyle = @signalGradient.getColor(lastSignal)
         ctx.fillRect(p.x-gridSize/2, p.y-gridSize/2, gridSize, gridSize)
 
