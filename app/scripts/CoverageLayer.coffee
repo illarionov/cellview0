@@ -7,9 +7,8 @@
 #
 define [
   'leaflet',
-  'quadtree',
   'SignalGradient'
-], (L, QuadTree, SignalGradient) ->
+], (L, SignalGradient) ->
   "use strict"
   class CoverageLayer extends L.Class
     constructor: ->

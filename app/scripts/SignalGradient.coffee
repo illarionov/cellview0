@@ -62,7 +62,7 @@ define [], () ->
       ctx.fillStyle = "#333333"
       ctx.strokeStyle = "#333333"
       ctx.lineWidth = 0.5
-      ctx.font = 'normal 11px sans-serif';
+      ctx.font = 'normal 11px sans-serif'
 
       textDx = gradWidth /  @_gradientSteps.length
       signalDt = (@_signalMax - @_signalMin) / @_gradientSteps.length
