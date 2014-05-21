@@ -4,6 +4,7 @@ define [
 
     @API_URL: "http://127.0.0.1:8080"
     @API_COVERAGE_URL: @API_URL + "/v1/coverage"
+    @API_COVERAGE_HULL_URL: @API_COVERAGE_URL + "/hull"
     @API_CELLS_URL: @API_URL + "/v1/cells"
 
     @MAPBOX_API_KEY: 'lsillarionov.ghk4pdd0'

@@ -20,6 +20,7 @@ define [
 
       @_initMainLayers()
       @_initCoverageLayer()
+      @_initCoverageHullLayer()
       @_initSidebar()
       @_initLegend()
 
@@ -38,7 +39,18 @@ define [
 
     _initCoverageLayer: ->
       @coverageLayer = new CoverageLayer()
-      @coverageLayer.addTo(@leafletMap)
+      @coverageLayer.addTo @leafletMap
+
+    _initCoverageHullLayer: ->
+      @coverageHullLayer = new L.geoJson([],
+        style:
+          color: 'rgba(60,60,60,0.7)'
+          fill: false
+          weight: 4
+          clickable: false
+      )
+
+      @coverageHullLayer.addTo @leafletMap
 
     _initSidebar: ->
       @sidebar = L.control.sidebar('sidebar', {

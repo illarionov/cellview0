@@ -13,12 +13,12 @@ define [
 
       @formController = new CellsFormController($("#sidebar"))
       @formController.setOnFormChangedListener (controller) =>
-        @updateCoverageLayer(controller.getRequestHash(), controller.getDescription())
+        @updateCoverage(controller.getRequestHash(), controller.getDescription())
         this
 
       @formController.setOnDataLoadedListener (controller) =>
         controller.setRequestHash(Constants.DEFAULT_COVERAGE_FORM)
-        @updateCoverageLayer(controller.getRequestHash(), controller.getDescription())
+        @updateCoverage(controller.getRequestHash(), controller.getDescription())
         setTimeout( =>
           @mapView.sidebar.show()
         , 100)
@@ -26,10 +26,11 @@ define [
 
       @formController.loadData()
 
-    updateCoverageLayer: (request, description) ->
+    updateCoverage: (request, description) ->
       @mapView.spin true
       $(".description:first").text description
       coverageData = []
+      hullData=null
       $.ajax
         dataType: "json"
         url: Constants.API_COVERAGE_URL
@@ -41,6 +42,20 @@ define [
         complete: =>
           @mapView.spin(false)
           @mapView.coverageLayer.setData coverageData
+
+      @mapView.spin true
+      $.ajax
+        dataType: "json"
+        url: Constants.API_COVERAGE_HULL_URL
+        data: request
+        success: (data, textStatus, jqXHR) ->
+          hullData = data
+        error: (jqXHR, textStatus, errorThrown) ->
+          alert(textStatus)
+        complete: =>
+          @mapView.spin(false)
+          @mapView.coverageHullLayer.clearLayers()
+          @mapView.coverageHullLayer.addData hullData if hullData
 
   $ ->
     app = new Application()
