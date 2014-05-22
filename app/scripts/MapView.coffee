@@ -31,10 +31,10 @@ define [
       )
 
     _initMainLayers: ->
-      new L.tileLayer(Constants.MAPBOX_LAYER_URI, {
+      new L.tileLayer(Constants.MAP_MAIN_LAYER, {
         minZoom: 0,
         maxZoom: 18,
-        attribution: 'Map data © <a href="http://www.openstreetmap.org">OpenStreetMap contributors</a>'
+        attribution: Constants.MAP_MAIN_LAYER_ATTRIBUTION
       }).addTo(@leafletMap)
 
     _initCoverageLayer: ->

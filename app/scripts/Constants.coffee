@@ -7,8 +7,10 @@ define [
     @API_COVERAGE_HULL_URL: @API_COVERAGE_URL + "/hull"
     @API_CELLS_URL: @API_URL + "/v1/cells"
 
-    @MAPBOX_API_KEY: '/* @echo MAPBOX_API_KEY */' || 'examples.map-i86nkdio'
-    @MAPBOX_LAYER_URI: "http://api.tiles.mapbox.com/v3/#{@MAPBOX_API_KEY}/{z}/{x}/{y}.png"
+    @MAP_MAIN_LAYER: '/* @echo MAP_MAIN_LAYER */' ||
+      "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    @MAP_MAIN_LAYER_ATTRIBUTION = '/* @echo MAP_MAIN_LAYER_ATTRIBUTION */' ||
+      'Map data © <a href="http://www.openstreetmap.org">OpenStreetMap contributors</a>'
     @MAP_DEFAULT_CENTER: [56.1130, 47.2714]
     @MAP_DEFAULT_ZOOM: 11
 
