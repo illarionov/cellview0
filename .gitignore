@@ -5,3 +5,4 @@ app/typescript
 .idea/
 dist/
 app/.tmp/
+secrets.yml

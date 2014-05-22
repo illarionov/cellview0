@@ -1,10 +1,25 @@
 'use strict';
-// Generated on 2014-03-29 using generator-leaflet 0.0.10
 
 var gulp = require('gulp'),
   open = require('open'),
   wiredep = require('wiredep').stream,
-  $ = require('gulp-load-plugins')();
+  yaml = require('js-yaml'),
+  fs   = require('fs'),
+  $ = require('gulp-load-plugins')(),
+  secrets = yaml.safeLoad(fs.readFileSync('secrets.yml', 'utf8')),
+  environment = process.env.NODE_ENV || 'development';
+
+function getDistDir(subdir) {
+  var dir = 'dist/' + environment;
+  if (subdir) { dir +=  '/' + subdir; }
+  return dir;
+}
+
+function getTmpDir(subdir) {
+  var dir = 'app/.tmp/' + environment;
+  if (subdir) { dir +=  '/' + subdir; }
+  return dir;
+}
 
 // Styles
 gulp.task('styles', function () {
@@ -36,18 +51,23 @@ gulp.task('jshint', function () {
 
 // coffees
 gulp.task('coffees', ['coffeelint'], function () {
+  var configFilter = $.filter(['Constants.coffee']);
+
   return gulp.src(['app/scripts/**/*.coffee'])
+    .pipe(configFilter)
+    .pipe($.preprocess({context: secrets[environment]}))
+    .pipe(configFilter.restore())
     .pipe($.coffee({bare: true}).on('error', $.util.log))
-    .pipe(gulp.dest('app/.tmp/coffee/'))
+    .pipe(gulp.dest(getTmpDir('coffee')))
     .pipe($.size());
 });
 
 // requirejs
 gulp.task('requirejs', ['coffees', 'jshint'], function () {
   $.requirejs({
-    baseUrl: 'app/.tmp/coffee/',
+    baseUrl: getTmpDir('coffee'),
     include: ['requirejs', 'config'],
-    mainConfigFile: 'app/.tmp/coffee/config.js',
+    mainConfigFile: getTmpDir('coffee') + '/config.js',
     out: 'body.js',
     preserveLicenseComments: true,
     useStrict: true,
@@ -58,7 +78,7 @@ gulp.task('requirejs', ['coffees', 'jshint'], function () {
       'comments': true,
       'indent_level': 2
      }}))
-    .pipe(gulp.dest('dist/scripts')).pipe($.size())
+    .pipe(gulp.dest(getDistDir('scripts'))).pipe($.size())
     .pipe($.notify({
       message: '<%= options.date %> ✓ requirejs: <%= file.relative %>',
       templateOptions: {
@@ -94,7 +114,7 @@ gulp.task('html', ['styles', 'scripts'], function () {
     .pipe(cssFilter.restore())
     .pipe($.useref.restore())
     .pipe($.useref())
-    .pipe(gulp.dest('dist'))
+    .pipe(gulp.dest(getDistDir()))
     .pipe($.size());
 });
 
@@ -109,13 +129,17 @@ gulp.task('images', function () {
       progressive: true,
       interlaced: true
     })))
-    .pipe(gulp.dest('dist/images'))
+    .pipe(gulp.dest(getDistDir('images')))
     .pipe($.size());
 });
 
 // Clean
 gulp.task('clean', function () {
-  return gulp.src(['dist/styles', 'app/.tmp/coffee', 'dist/scripts', 'dist/images'], { read: false }).pipe($.clean());
+  return gulp.src([
+    getDistDir('styles'),
+    getTmpDir('coffee'),
+    getDistDir('scripts'),
+    getDistDir('images')], { read: false }).pipe($.clean());
 });
 
 // Build
@@ -186,4 +210,21 @@ gulp.task('watch', ['connect', 'serve'], function () {
 
   // Watch bower files
   gulp.watch('bower.json', ['wiredep']);
+});
+
+gulp.task('set-environment-production', function() {
+  environment = process.env.NODE_ENV || 'production';
+});
+
+// Deploy
+gulp.task('deploy', ['set-environment-production', 'build'], function() {
+
+  var host = secrets[environment].deploy.host,
+    port = secrets[environment].deploy.port || 22,
+    dir = secrets[environment].deploy.dir;
+
+  return gulp.src(getDistDir(), {read: false})
+   .pipe($.shell([
+    'rsync  -e "ssh -p ' + port + '" -av --delete ' + getDistDir() + '/ ' + host + ':' + dir + '/'
+   ]));
 });
