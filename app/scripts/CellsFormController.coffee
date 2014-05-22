@@ -54,19 +54,19 @@ define [
     getDescription: ->
       description = []
       mcc = @selectMcc.getSelectedVal()
-      if mcc then description.push("mcc: " + CellsFormController.getMccDescription mcc)
+      if mcc then description.push("<b>mcc:</b>&nbsp;" + CellsFormController.getMccDescription mcc)
       mnc = @selectMnc.getSelectedVal()
-      if mnc then description.push("mnc: " + CellsFormController.getMncDescription mnc)
+      if mnc then description.push("<b>mnc:</b>&nbsp;" + CellsFormController.getMncDescription mnc)
       radio = @selectRadio.getSelectedVal()
-      if radio then description.push "radio: #{radio}"
+      if radio then description.push "<b>radio:</b>&nbsp;#{radio}"
       lac = @selectLac.getSelectedVal()
-      if lac then description.push "lac: #{lac}"
+      if lac then description.push "<b>lac:</b>&nbsp;#{lac}"
       rnc = @selectRnc.getSelectedVal()
-      if rnc then description.push "rnc: #{rnc}"
+      if rnc then description.push "<b>rnc:</b>&nbsp;#{rnc}"
       psc = @selectPsc.getSelectedVal()
-      if psc then description.push "psc: #{psc}"
+      if psc then description.push "<b>psc:</b>&nbsp;#{psc}"
       cid = @selectCid.getSelectedVal()
-      if cid then description.push "cid: #{cid}"
+      if cid then description.push "<b>cid:</b>&nbsp;#{cid}"
       description.join(', ')
 
     getCells: (reqHash) ->

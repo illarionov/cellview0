@@ -3,8 +3,9 @@ define [
     'CellsFormController'
     'MapView',
     'jquery',
-    'leaflet'
-  ], (Constants, CellsFormController, MapView, $, L) ->
+    'underscore',
+    'leaflet',
+  ], (Constants, CellsFormController, MapView, $, _, L) ->
   "use strict"
   class Application
     constructor: ->
@@ -13,14 +14,18 @@ define [
 
       @formController = new CellsFormController($("#sidebar"))
       @formController.setOnFormChangedListener (controller) =>
-        @updateCoverage(controller.getRequestHash(), controller.getDescription())
-        @updateLinkXintRu(controller.getRequestHash())
+        reqHash = controller.getRequestHash()
+        @updateCoverage(reqHash, controller.getDescription())
+        @updateLinkXintRu(reqHash)
+        @updateCellDescription(reqHash)
         this
 
       @formController.setOnDataLoadedListener (controller) =>
         controller.setRequestHash(Constants.DEFAULT_COVERAGE_FORM)
-        @updateCoverage(controller.getRequestHash(), controller.getDescription())
-        @updateLinkXintRu(controller.getRequestHash())
+        reqHash = controller.getRequestHash()
+        @updateCoverage(reqHash, controller.getDescription())
+        @updateLinkXintRu(reqHash)
+        @updateCellDescription(reqHash)
         setTimeout( =>
           @mapView.sidebar.show()
         , 100)
@@ -30,7 +35,7 @@ define [
 
     updateCoverage: (request, description) ->
       @mapView.spin true
-      $(".description:first").text description
+      $(".cells-form-value:first").html description
       coverageData = []
       hullData=null
       $.ajax
@@ -63,11 +68,7 @@ define [
       link = ""
       if req['cid']
         cells = @formController.getCells req
-        cell = null
-        for cellInfo in cells
-          if cellInfo['mcc'] and cellInfo['mnc'] and cellInfo['lac'] and cellInfo['cid']
-            cell = cellInfo
-            break
+        cell = @_getCell(req)
         if cell?
           xinitReq = {}
           xinitReq[p] = cell[p] for p in [ 'mcc','mnc','lac','cid']
@@ -80,6 +81,27 @@ define [
             target: '_blank'
           )
       $('.link-xinit-ru:first').html(link)
+
+    updateCellDescription: (req) ->
+      description = ""
+      cell = @_getCell(req)
+      if cell
+        h = []
+        mainKeys = ['mcc', 'mnc', 'radio', 'lac', 'psc', 'cid']
+        additionalKeys = _.chain(cell).keys().difference(mainKeys).value().sort()
+
+        for k in mainKeys.concat(additionalKeys)
+          h.push "<b>#{k}:</b>&nbsp;" + _.escape(cell[k])
+        description = h.join(", ")
+      $('.cell-description:first').html(description)
+
+    _getCell: (req) ->
+      return if not req['cid']?
+      cells = @formController.getCells req
+      return _.find(cells, (cell) ->
+        return cell['mcc']? and cell['mnc']? and cell['lac']? and cell['cid']?
+      )
+
 
   $ ->
     app = new Application()
