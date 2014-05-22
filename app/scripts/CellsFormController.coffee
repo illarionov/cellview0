@@ -69,6 +69,18 @@ define [
       if cid then description.push "cid: #{cid}"
       description.join(', ')
 
+    getCells: (reqHash) ->
+      reqHash = {} if not reqHash?
+      cells = @cells
+      for p in ['mcc', 'mnc', 'lac', 'cid', 'psc']
+        cells = @_grepInt(cells, p, reqHash[p]) if reqHash[p]?
+      if reqHash['network_radio']?
+        cells = (cellInfo for cellInfo in cells when cellInfo['radio'] == reqHash['network_radio'])
+      if reqHash['rnc']?
+        rnc = parseInt(reqHash['rnc'])
+        cells = (cellInfo for cellInfo in cells when cellInfo['cid'] >> 16 == rnc)
+      return cells
+
     setRequestHash: (req) ->
       @selectMcc.setSelectedVal(req['mcc'])
       @selectMnc.setSelectedVal(req['mnc'])

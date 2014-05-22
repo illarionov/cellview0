@@ -14,11 +14,13 @@ define [
       @formController = new CellsFormController($("#sidebar"))
       @formController.setOnFormChangedListener (controller) =>
         @updateCoverage(controller.getRequestHash(), controller.getDescription())
+        @updateLinkXintRu(controller.getRequestHash())
         this
 
       @formController.setOnDataLoadedListener (controller) =>
         controller.setRequestHash(Constants.DEFAULT_COVERAGE_FORM)
         @updateCoverage(controller.getRequestHash(), controller.getDescription())
+        @updateLinkXintRu(controller.getRequestHash())
         setTimeout( =>
           @mapView.sidebar.show()
         , 100)
@@ -56,6 +58,28 @@ define [
           @mapView.spin(false)
           @mapView.coverageHullLayer.clearLayers()
           @mapView.coverageHullLayer.addData hullData if hullData
+
+    updateLinkXintRu: (req) ->
+      link = ""
+      if req['cid']
+        cells = @formController.getCells req
+        cell = null
+        for cellInfo in cells
+          if cellInfo['mcc'] and cellInfo['mnc'] and cellInfo['lac'] and cellInfo['cid']
+            cell = cellInfo
+            break
+        if cell?
+          xinitReq = {}
+          xinitReq[p] = cell[p] for p in [ 'mcc','mnc','lac','cid']
+          xinitReq['networkType'] = cell['radio'] if cell['radio']
+
+          url = "http://xinit.ru/bs/#!?" + $.param(xinitReq)
+          link = $('<a>',
+            text: 'Cell info on xinit.ru'
+            href: url
+            target: '_blank'
+          )
+      $('.link-xinit-ru:first').html(link)
 
   $ ->
     app = new Application()
