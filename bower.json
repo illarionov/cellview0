@@ -9,7 +9,8 @@
     "backbone": "~1.1.2",
     "requirejs": "~2.1.11",
     "Leaflet.Spin": "https://github.com/makinacorpus/Leaflet.Spin.git",
-    "spin.js": "~2.0.1"
+    "spin.js": "~2.0.1",
+    "jquery-deparam": "~0.2.0"
   },
   "devDependencies": {
     "dt-jquery2": "*"

@@ -6,7 +6,8 @@ define [
     'underscore',
     'leaflet',
     'bootflat'
-  ], (Constants, CellsFormController, MapView, $, _, L, Bootflat) ->
+    'jquery-deparam'
+  ], (Constants, CellsFormController, MapView, $, _, L, Bootflat, jqDeparam) ->
   "use strict"
   class Application
     constructor: ->
@@ -14,25 +15,33 @@ define [
       $(".nav .btn_toggle_sidebar:first").click => @mapView.sidebar.toggle()
 
       @formController = new CellsFormController($("#sidebar"))
-      @formController.setOnFormChangedListener (controller) =>
-        reqHash = controller.getRequestHash()
-        @updateCoverage(reqHash, controller.getDescription())
-        @updateLinkXintRu(reqHash)
-        @updateCellDescription(reqHash)
-        this
+      @formController.setOnFormChangedListener (controller) => @onFormControllerChanged(controller)
 
       @formController.setOnDataLoadedListener (controller) =>
-        controller.setRequestHash(Constants.DEFAULT_COVERAGE_FORM)
-        reqHash = controller.getRequestHash()
-        @updateCoverage(reqHash, controller.getDescription())
-        @updateLinkXintRu(reqHash)
-        @updateCellDescription(reqHash)
+        controller.setRequestHash(@getRequestHashFromLocationHref())
+        @onFormControllerChanged(controller)
         setTimeout( =>
           @mapView.sidebar.show()
         , 100)
         this
 
       @formController.loadData()
+
+    getRequestHashFromLocationHref: ->
+      hash = window.location.hash
+      if (hash.indexOf('#') == 0) then hash = hash.substr(1)
+
+      h = jqDeparam(hash)
+      if _.isEmpty(h) then h = Constants.DEFAULT_COVERAGE_FORM
+      return h
+
+    onFormControllerChanged: (controller) ->
+      reqHash = controller.getRequestHash()
+      @updateCoverage(reqHash, controller.getDescription())
+      @updateLinkXintRu(reqHash)
+      @updateCellDescription(reqHash)
+      window.location.hash = '#' + $.param(reqHash)
+      this
 
     updateCoverage: (request, description) ->
       @mapView.spin true
