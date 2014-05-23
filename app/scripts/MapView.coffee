@@ -13,6 +13,8 @@ define [
     constructor: ->
       window.Spinner = Spinner
 
+      @coverageRequest = {}
+
       @leafletMap = L.map "map", {
         center: Constants.MAP_DEFAULT_CENTER,
         zoom: Constants.MAP_DEFAULT_ZOOM
@@ -23,6 +25,7 @@ define [
       @_initCoverageHullLayer()
       @_initSidebar()
       @_initLegend()
+      @_initLayerControl()
 
     spin: (doSpin) ->
       @leafletMap.spin(doSpin,
@@ -30,12 +33,52 @@ define [
         left: '45%'
       )
 
+    updateCoverage: (request) ->
+      @coverageRequest = request
+      coverageData = []
+      @spin true
+      $.ajax
+        dataType: "json"
+        url: Constants.API_COVERAGE_URL
+        data: @coverageRequest
+        success: (data, textStatus, jqXHR) ->
+          coverageData = data
+        error: (jqXHR, textStatus, errorThrown) ->
+          alert(textStatus)
+        complete: =>
+          @spin(false)
+          @coverageLayer.setData coverageData
+      @_updateCoverageContour()
+      return
+
+    _updateCoverageContour: () ->
+      if not @leafletMap.hasLayer @coverageHullLayer
+        @coverageHullLayer.clearLayers()
+        return
+
+      hullData=null
+      @spin true
+      $.ajax
+        dataType: "json"
+        url: Constants.API_COVERAGE_HULL_URL
+        data: @coverageRequest
+        success: (data, textStatus, jqXHR) ->
+          hullData = data
+        error: (jqXHR, textStatus, errorThrown) ->
+          alert(textStatus)
+        complete: =>
+          @spin(false)
+          @coverageHullLayer.clearLayers()
+          @coverageHullLayer.addData hullData if hullData
+      return
+
     _initMainLayers: ->
-      new L.tileLayer(Constants.MAP_MAIN_LAYER, {
+      @mainLayer = new L.tileLayer(Constants.MAP_MAIN_LAYER, {
         minZoom: 0,
         maxZoom: 18,
         attribution: Constants.MAP_MAIN_LAYER_ATTRIBUTION
-      }).addTo(@leafletMap)
+      })
+      @mainLayer.addTo(@leafletMap)
 
     _initCoverageLayer: ->
       @coverageLayer = new CoverageLayer()
@@ -75,6 +118,20 @@ define [
       @legend.update = (props) =>
         @coverageLayer.signalGradient.drawLegend(@legend._canvas)
       @legend.addTo(@leafletMap)
+
+    _initLayerControl: ->
+      mainLayers = {}
+      mainLayers[Constants.MAP_MAIN_LAYER_NAME] = @mainLayer
+
+      optionalLayers =
+        'Coverage contour': @coverageHullLayer
+
+      @layerControl = L.control.layers(mainLayers, optionalLayers)
+      @layerControl.addTo(@leafletMap)
+
+      @leafletMap.on 'overlayadd', (event) =>
+        if @coverageHullLayer == event.layer
+          @_updateCoverageContour()
 
 
   return MapView

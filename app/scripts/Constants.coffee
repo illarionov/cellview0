@@ -11,6 +11,7 @@ define [
       "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
     @MAP_MAIN_LAYER_ATTRIBUTION = '/* @echo MAP_MAIN_LAYER_ATTRIBUTION */' ||
       'Map data © <a href="http://www.openstreetmap.org">OpenStreetMap contributors</a>'
+    @MAP_MAIN_LAYER_NAME: '/* @echo MAP_MAIN_LAYER_NAME */' || 'OSM Mapnik'
     @MAP_DEFAULT_CENTER: [56.1130, 47.2714]
     @MAP_DEFAULT_ZOOM: 11
 

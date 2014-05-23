@@ -16,7 +16,6 @@ define [
 
       @formController = new CellsFormController($("#sidebar"))
       @formController.setOnFormChangedListener (controller) => @onFormControllerChanged(controller)
-
       @formController.setOnDataLoadedListener (controller) =>
         controller.setRequestHash(@getRequestHashFromLocationHref())
         @onFormControllerChanged(controller)
@@ -37,42 +36,12 @@ define [
 
     onFormControllerChanged: (controller) ->
       reqHash = controller.getRequestHash()
-      @updateCoverage(reqHash, controller.getDescription())
+      $(".cells-form-value:first").html controller.getDescription()
+      @mapView.updateCoverage(reqHash)
       @updateLinkXintRu(reqHash)
       @updateCellDescription(reqHash)
       window.location.hash = '#' + $.param(reqHash)
       this
-
-    updateCoverage: (request, description) ->
-      @mapView.spin true
-      $(".cells-form-value:first").html description
-      coverageData = []
-      hullData=null
-      $.ajax
-        dataType: "json"
-        url: Constants.API_COVERAGE_URL
-        data: request
-        success: (data, textStatus, jqXHR) ->
-          coverageData = data
-        error: (jqXHR, textStatus, errorThrown) ->
-          alert(textStatus)
-        complete: =>
-          @mapView.spin(false)
-          @mapView.coverageLayer.setData coverageData
-
-      @mapView.spin true
-      $.ajax
-        dataType: "json"
-        url: Constants.API_COVERAGE_HULL_URL
-        data: request
-        success: (data, textStatus, jqXHR) ->
-          hullData = data
-        error: (jqXHR, textStatus, errorThrown) ->
-          alert(textStatus)
-        complete: =>
-          @mapView.spin(false)
-          @mapView.coverageHullLayer.clearLayers()
-          @mapView.coverageHullLayer.addData hullData if hullData
 
     updateLinkXintRu: (req) ->
       link = ""
@@ -91,6 +60,7 @@ define [
             target: '_blank'
           )
       $('.link-xinit-ru:first').html(link)
+      return
 
     updateCellDescription: (req) ->
       description = ""
@@ -111,7 +81,6 @@ define [
       return _.find(cells, (cell) ->
         return cell['mcc']? and cell['mnc']? and cell['lac']? and cell['cid']?
       )
-
 
   $ ->
     app = new Application()
