@@ -15,6 +15,11 @@ define [
     @MAP_DEFAULT_CENTER: [56.1130, 47.2714]
     @MAP_DEFAULT_ZOOM: 11
 
+    @OPEN_CELL_ID_API_URL: 'http://opencellid.org'
+    @OPEN_CELL_ID_API_GET_CELL_URL = @OPEN_CELL_ID_API_URL + '/cell/get'
+    @OPEN_CELL_ID_API_KEY: '/* @echo OPEN_CELL_ID_API_KEY */'
+
+
     @MCC_NAMES:
       250: 'Russia'
 

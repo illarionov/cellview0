@@ -122,7 +122,7 @@ gulp.task('html', ['styles', 'scripts'], function () {
 gulp.task('images', function () {
   return gulp.src([
     'app/images/**/*',
-    'app/lib/images/*'
+    'app/lib/images/*',
   ])
     .pipe($.cache($.imagemin({
       optimizationLevel: 3,
@@ -130,6 +130,13 @@ gulp.task('images', function () {
       interlaced: true
     })))
     .pipe(gulp.dest(getDistDir('images')))
+    .pipe($.size());
+});
+
+// Leaflet images
+gulp.task('leaflet_images', function () {
+  return gulp.src('app/bower_components/leaflet-0.7.2.zip/images/*')
+    .pipe(gulp.dest(getDistDir('styles/images')))
     .pipe($.size());
 });
 
@@ -143,7 +150,7 @@ gulp.task('clean', function () {
 });
 
 // Build
-gulp.task('build', ['html', 'images']);
+gulp.task('build', ['html', 'images', 'leaflet_images']);
 
 // Default task
 gulp.task('default', ['clean'], function () {
@@ -179,6 +186,7 @@ gulp.task('wiredep', function () {
       ignorePath: 'app/'
     }))
     .pipe(gulp.dest('app'));
+
 });
 
 // Watch

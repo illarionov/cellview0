@@ -29,42 +29,39 @@ define [
     getRequestHashFromLocationHref: ->
       hash = window.location.hash
       if (hash.indexOf('#') == 0) then hash = hash.substr(1)
-
       h = jqDeparam(hash)
       if _.isEmpty(h) then h = Constants.DEFAULT_COVERAGE_FORM
       return h
 
     onFormControllerChanged: (controller) ->
       reqHash = controller.getRequestHash()
+      currentCell = @_getCell(reqHash)
       $(".cells-form-value:first").html controller.getDescription()
-      @mapView.updateCoverage(reqHash)
-      @updateLinkXintRu(reqHash)
-      @updateCellDescription(reqHash)
+      @mapView.setFormControllerRequest(reqHash)
+      @mapView.setCurrentCell(currentCell)
+      @updateLinkXintRu(currentCell)
+      @updateCellDescription(currentCell)
       window.location.hash = '#' + $.param(reqHash)
       this
 
-    updateLinkXintRu: (req) ->
+    updateLinkXintRu: (cell) ->
       link = ""
-      if req['cid']
-        cells = @formController.getCells req
-        cell = @_getCell(req)
-        if cell?
-          xinitReq = {}
-          xinitReq[p] = cell[p] for p in [ 'mcc','mnc','lac','cid']
-          xinitReq['networkType'] = cell['radio'] if cell['radio']
+      if cell?
+        xinitReq = {}
+        xinitReq[p] = cell[p] for p in [ 'mcc','mnc','lac','cid']
+        xinitReq['networkType'] = cell['radio'] if cell['radio']
 
-          url = "http://xinit.ru/bs/#!?" + $.param(xinitReq)
-          link = $('<a>',
-            text: 'Cell info on xinit.ru'
-            href: url
-            target: '_blank'
-          )
+        url = "http://xinit.ru/bs/#!?" + $.param(xinitReq)
+        link = $('<a>',
+          text: 'Cell info on xinit.ru'
+          href: url
+          target: '_blank'
+        )
       $('.link-xinit-ru:first').html(link)
       return
 
-    updateCellDescription: (req) ->
+    updateCellDescription: (cell) ->
       description = ""
-      cell = @_getCell(req)
       if cell
         h = []
         mainKeys = ['mcc', 'mnc', 'radio', 'lac', 'psc', 'cid']

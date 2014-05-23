@@ -13,7 +13,8 @@ define [
     constructor: ->
       window.Spinner = Spinner
 
-      @coverageRequest = {}
+      @_formControllerReq = {}
+      @_currentCell = null
 
       @leafletMap = L.map "map", {
         center: Constants.MAP_DEFAULT_CENTER,
@@ -23,6 +24,7 @@ define [
       @_initMainLayers()
       @_initCoverageLayer()
       @_initCoverageHullLayer()
+      @_initOpenCellIdLayer()
       @_initSidebar()
       @_initLegend()
       @_initLayerControl()
@@ -33,14 +35,22 @@ define [
         left: '45%'
       )
 
-    updateCoverage: (request) ->
-      @coverageRequest = request
+    setFormControllerRequest: (request) ->
+      @_formControllerReq = request
+      @_updateCoverage()
+      @_updateCoverageContour()
+
+    setCurrentCell: (cell) ->
+      @_currentCell = cell
+      @_updateOpenCellIdLayer()
+
+    _updateCoverage: () ->
       coverageData = []
       @spin true
       $.ajax
         dataType: "json"
         url: Constants.API_COVERAGE_URL
-        data: @coverageRequest
+        data: @_formControllerReq
         success: (data, textStatus, jqXHR) ->
           coverageData = data
         error: (jqXHR, textStatus, errorThrown) ->
@@ -48,10 +58,9 @@ define [
         complete: =>
           @spin(false)
           @coverageLayer.setData coverageData
-      @_updateCoverageContour()
       return
 
-    _updateCoverageContour: () ->
+    _updateCoverageContour: ->
       if not @leafletMap.hasLayer @coverageHullLayer
         @coverageHullLayer.clearLayers()
         return
@@ -61,7 +70,7 @@ define [
       $.ajax
         dataType: "json"
         url: Constants.API_COVERAGE_HULL_URL
-        data: @coverageRequest
+        data: @_formControllerReq
         success: (data, textStatus, jqXHR) ->
           hullData = data
         error: (jqXHR, textStatus, errorThrown) ->
@@ -71,6 +80,54 @@ define [
           @coverageHullLayer.clearLayers()
           @coverageHullLayer.addData hullData if hullData
       return
+
+    _updateOpenCellIdLayer: ->
+      if not @leafletMap.hasLayer(@openCellIdLayer) or not @_currentCell
+        @openCellIdLayer.clearLayers()
+        return
+      req =
+        mcc: @_currentCell['mcc']
+        mnc: @_currentCell['mnc']
+        lac: @_currentCell['lac']
+        cellid: @_currentCell['cid']
+        key: Constants.OPEN_CELL_ID_API_KEY
+
+      response = null
+      @spin true
+      $.ajax
+        dataType: "xml"
+        url: Constants.OPEN_CELL_ID_API_GET_CELL_URL
+        data: req
+        success: (data, textStatus, jqXHR) ->
+          response = data
+        error: (jqXHR, textStatus, errorThrown) ->
+          alert(textStatus)
+        complete: =>
+          @spin(false)
+          @openCellIdLayer.clearLayers()
+
+          if response? and $(response).find('rsp')?
+            rsp = $(response).find('rsp').get()
+            rsp = $(rsp)
+            if rsp.attr('stat')? and rsp.attr('stat') == 'ok'
+              cell = rsp.find('cell')
+              lat = parseFloat(cell.attr('lat'))
+              lon = parseFloat(cell.attr('lon'))
+              marker = new L.marker([lat, lon],
+                icon: new L.icon(
+                  iconUrl: 'images/marker-opencellid.png'
+                  iconSize: [30, 40]
+                  iconAnchor: [15, 39]
+                  popupAnchor: [0, -40]
+                )
+              )
+              desc = []
+              for attr in cell[0].attributes
+                desc.push "<b>#{attr.name}:</b>&nbsp;#{attr.value}"
+
+              marker.bindPopup("<h5>OpenCellID</h5>" + desc.join("<br/>"))
+
+              @openCellIdLayer.addLayer marker
 
     _initMainLayers: ->
       @mainLayer = new L.tileLayer(Constants.MAP_MAIN_LAYER, {
@@ -94,6 +151,12 @@ define [
       )
 
       @coverageHullLayer.addTo @leafletMap
+
+    _initOpenCellIdLayer: ->
+      @openCellIdLayer = new L.LayerGroup()
+      @openCellIdLayer.getAttribution = ->
+        '<a href="http://opencellid.org/">OpenCellID</a> Database CC-BY-SA 3.0'
+      @openCellIdLayer.addTo(@leafletMap)
 
     _initSidebar: ->
       @sidebar = L.control.sidebar('sidebar', {
@@ -125,6 +188,7 @@ define [
 
       optionalLayers =
         'Coverage contour': @coverageHullLayer
+        'OpenCellID cell marker': @openCellIdLayer
 
       @layerControl = L.control.layers(mainLayers, optionalLayers)
       @layerControl.addTo(@leafletMap)
@@ -132,6 +196,8 @@ define [
       @leafletMap.on 'overlayadd', (event) =>
         if @coverageHullLayer == event.layer
           @_updateCoverageContour()
+        else if @openCellIdLayer == event.layer
+          @_updateOpenCellIdLayer()
 
 
   return MapView
