@@ -10,6 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, , maximum-scale=1, user-scalable=no">
 
     <!-- build:css styles/vendor.css -->
+    <link rel="stylesheet" href="bower_components/bootflatv2/css/bootstrap.min.css">
     <link rel="stylesheet" href="bower_components/bootflatv2/css/site.min.css">
 
     <link rel="stylesheet" href="bower_components/leaflet-sidebar/src/L.Control.Sidebar.css">
@@ -24,9 +25,6 @@
     <!-- endbuild -->
     <link rel="shortcut icon" href="/favicon.ico">
 
-    <!-- build:js scripts/header.js -->
-    <script src="bower_components/bootflatv2/js/site.min.js"></script>
-    <!-- endbuild -->
 </head>
 <body>
     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -39,6 +37,11 @@
             <a class="navbar-brand" href="#">CellView</a>
         </div>
         <ul class="nav navbar-nav">
+            <li><a href="#"
+                   data-toggle="collapse"
+                   data-target=".navbar-collapse.in"
+                   onclick="$('#aboutModal').modal('show'); return false;">
+                <i class="fa fa-question-circle" style="color: white"></i>&nbsp;&nbsp;About</a></li>
             <li>
                 <a href="#"
                    class="btn_toggle_sidebar"
@@ -97,6 +100,28 @@
         <div class="cells-form-value"></div>
 
     </div>
+
+    <div class="modal fade" id="aboutModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">About</h4>
+                </div>
+                <div class="modal-body">
+                    <p>TODO</p>
+                    <ul>
+                        <li><a href="http://github.com/illarionov/cellview0">Source code</a></li>
+                        <li><a href="http://github.com/illarionov/mozserver">Server part</a></li>
+                        <li><a href="http://github.com/illarionov/MozStumbler">Modified mozstumbler</a></li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+
+                </div>
+            </div> <!--  /.modal-content -->
+        </div> <!-- /.modal-dialog -->
+    </div> <!-- /.modal -->
 
     <!-- build:remove scripts/require.js -->
     <script src="bower_components/requirejs/require.js" data-main=".tmp/development/coffee/config.js"></script>

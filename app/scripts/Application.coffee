@@ -5,7 +5,8 @@ define [
     'jquery',
     'underscore',
     'leaflet',
-  ], (Constants, CellsFormController, MapView, $, _, L) ->
+    'bootflat'
+  ], (Constants, CellsFormController, MapView, $, _, L, Bootflat) ->
   "use strict"
   class Application
     constructor: ->
