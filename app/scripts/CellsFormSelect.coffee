@@ -31,10 +31,16 @@ define [
       for k in Object.keys(@values).sort(
         (a,b) ->
           if (a == "")
-            return b == "" ? 0 : -1
+            if b == "" then return 0 else return -1
           if (b == "")
             return 1
-          return a - b
+
+          nA = parseInt(a, 10)
+          nB = parseInt(b, 10)
+          if (isNaN(nA) || isNaN(nB))
+            return a - b
+          else
+            return nA - nB
       )
         option = $('<option></option>').val(k).html(@values[k])
         @select.append option
