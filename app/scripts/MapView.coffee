@@ -25,6 +25,8 @@ define [
       @_initCoverageLayer()
       @_initCoverageHullLayer()
       @_initOpenCellIdLayer()
+      @_initYandexLayer()
+      @_initMozillaLayer()
       @_initSidebar()
       @_initLegend()
       @_initLayerControl()
@@ -43,6 +45,8 @@ define [
     setCurrentCell: (cell) ->
       @_currentCell = cell
       @_updateOpenCellIdLayer()
+      @_updateYandexLayer()
+      @_updateMozillaLayer()
 
     _updateCoverage: () ->
       coverageData = []
@@ -94,6 +98,7 @@ define [
 
       response = null
       @spin true
+      @openCellIdLayer.clearLayers()
       $.ajax
         dataType: "xml"
         url: Constants.OPEN_CELL_ID_API_GET_CELL_URL
@@ -104,7 +109,6 @@ define [
           alert(textStatus)
         complete: =>
           @spin(false)
-          @openCellIdLayer.clearLayers()
 
           if response? and $(response).find('rsp')?
             rsp = $(response).find('rsp').get()
@@ -128,6 +132,70 @@ define [
               marker.bindPopup("<h5>OpenCellID</h5>" + desc.join("<br/>"))
 
               @openCellIdLayer.addLayer marker
+
+    _updateYandexLayer: ->
+      if not @leafletMap.hasLayer(@yandexLayer) or not @_currentCell
+        @yandexLayer.clearLayers()
+        return
+      req =
+        mcc: @_currentCell['mcc']
+        mnc: @_currentCell['mnc']
+        lac: @_currentCell['lac']
+        cid: @_currentCell['cid']
+      response = null
+      @spin true
+      @yandexLayer.clearLayers()
+      $.ajax
+        dataType: "json"
+        url: Constants.API_YANDEX_CELL_ID_URL
+        data: req
+        success: (data, textStatus, jqXHR) ->
+          response = data
+        complete: =>
+          @spin(false)
+          if response?
+            marker = new L.marker([response['lat'], response['lon']],
+              icon: new L.icon(
+                iconUrl: 'images/marker-yandex.png'
+                iconSize: [30, 34]
+                iconAnchor: [8, 33]
+                popupAnchor: [0, -30]
+              )
+            )
+            marker.bindPopup("<h5>Yandex</h5>")
+            @yandexLayer.addLayer marker
+
+    _updateMozillaLayer: ->
+      if not @leafletMap.hasLayer(@mozillaLayer) or not @_currentCell
+        @mozillaLayer.clearLayers()
+        return
+      req =
+        mcc: @_currentCell['mcc']
+        mnc: @_currentCell['mnc']
+        lac: @_currentCell['lac']
+        cid: @_currentCell['cid']
+      response = null
+      @spin true
+      @mozillaLayer.clearLayers()
+      $.ajax
+        dataType: "json"
+        url: Constants.API_MOZILLA_CELL_ID_URL
+        data: req
+        success: (data, textStatus, jqXHR) ->
+          response = data
+        complete: =>
+          @spin(false)
+          if response?
+            marker = new L.marker([response['lat'], response['lon']],
+              icon: new L.icon(
+                iconUrl: 'images/marker-mozilla.png'
+                iconSize: [40, 40]
+                iconAnchor: [18, 38]
+                popupAnchor: [0, -40]
+              )
+            )
+            marker.bindPopup("<h5>Mozilla location service</h5>")
+            @mozillaLayer.addLayer marker
 
     _initMainLayers: ->
       @mainLayer = new L.tileLayer(Constants.MAP_MAIN_LAYER, {
@@ -157,6 +225,18 @@ define [
       @openCellIdLayer.getAttribution = ->
         '<a href="http://opencellid.org/">OpenCellID</a> Database CC-BY-SA 3.0'
       @openCellIdLayer.addTo(@leafletMap)
+
+    _initYandexLayer: ->
+      @yandexLayer = new L.LayerGroup()
+      @yandexLayer.getAttribution = ->
+        '<a href="http://yandex.ru/">Yandex</a> Database'
+      @yandexLayer.addTo(@leafletMap)
+
+    _initMozillaLayer: ->
+      @mozillaLayer = new L.LayerGroup()
+      @mozillaLayer.getAttribution = ->
+        '<a href="https://location.services.mozilla.com/">Mozilla</a> location service'
+      #@mozillaLayer.addTo(@leafletMap)
 
     _initSidebar: ->
       @sidebar = L.control.sidebar('sidebar', {
@@ -189,6 +269,8 @@ define [
       optionalLayers =
         'Coverage contour': @coverageHullLayer
         'OpenCellID cell marker': @openCellIdLayer
+        'Yandex cell marker': @yandexLayer
+        'Mozilla location service cell marker': @mozillaLayer
 
       @layerControl = L.control.layers(mainLayers, optionalLayers)
       @layerControl.addTo(@leafletMap)
@@ -198,6 +280,9 @@ define [
           @_updateCoverageContour()
         else if @openCellIdLayer == event.layer
           @_updateOpenCellIdLayer()
-
+        else if @yandexLayer == event.layer
+          @_updateYandexLayer()
+        else if @mozillaLayer == event.layer
+          @_updateMozillaLayer()
 
   return MapView

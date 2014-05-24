@@ -6,6 +6,8 @@ define [
     @API_COVERAGE_URL: @API_URL + "/v1/coverage"
     @API_COVERAGE_HULL_URL: @API_COVERAGE_URL + "/hull"
     @API_CELLS_URL: @API_URL + "/v1/cells"
+    @API_YANDEX_CELL_ID_URL: @API_URL + "/v1/cell/location/yandex"
+    @API_MOZILLA_CELL_ID_URL: @API_URL + "/v1/cell/location/mozilla"
 
     @MAP_MAIN_LAYER: '/* @echo MAP_MAIN_LAYER */' ||
       "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
