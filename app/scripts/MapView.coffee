@@ -312,6 +312,7 @@ define [
         'OpenCellID cell marker': @openCellIdLayer
         'Yandex cell marker': @yandexLayer
         'Mozilla location service cell marker': @mozillaLayer
+        'Google cell location': @googleLayer
 
       @layerControl = L.control.layers(mainLayers, optionalLayers)
       @layerControl.addTo(@leafletMap)
