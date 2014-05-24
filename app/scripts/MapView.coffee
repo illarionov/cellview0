@@ -174,6 +174,7 @@ define [
         mnc: @_currentCell['mnc']
         lac: @_currentCell['lac']
         cid: @_currentCell['cid']
+        network_radio: @_currentCell['radio']
       response = null
       @spin true
       @mozillaLayer.clearLayers()
