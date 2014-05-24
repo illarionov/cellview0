@@ -27,6 +27,7 @@ define [
       @_initOpenCellIdLayer()
       @_initYandexLayer()
       @_initMozillaLayer()
+      @_initGoogleLayer()
       @_initSidebar()
       @_initLegend()
       @_initLayerControl()
@@ -47,6 +48,7 @@ define [
       @_updateOpenCellIdLayer()
       @_updateYandexLayer()
       @_updateMozillaLayer()
+      @_updateGoogleLayer()
 
     _updateCoverage: () ->
       coverageData = []
@@ -198,6 +200,38 @@ define [
             marker.bindPopup("<h5>Mozilla location service</h5>")
             @mozillaLayer.addLayer marker
 
+    _updateGoogleLayer: ->
+      if not @leafletMap.hasLayer(@googleLayer) or not @_currentCell
+        @googleLayer.clearLayers()
+        return
+      req =
+        mcc: @_currentCell['mcc']
+        mnc: @_currentCell['mnc']
+        lac: @_currentCell['lac']
+        cid: @_currentCell['cid']
+      response = null
+      @spin true
+      @googleLayer.clearLayers()
+      $.ajax
+        dataType: "json"
+        url: Constants.API_GOOGLE_CELL_ID_URL
+        data: req
+        success: (data, textStatus, jqXHR) ->
+          response = data
+        complete: =>
+          @spin(false)
+          if response?
+            marker = new L.marker([response['lat'], response['lon']],
+              icon: new L.icon(
+                iconUrl: 'images/marker-google.png'
+                iconSize: [22, 40]
+                iconAnchor: [11, 40]
+                popupAnchor: [0, -40]
+              )
+            )
+            marker.bindPopup("<h5>Google cell location</h5>")
+            @googleLayer.addLayer marker
+
     _initMainLayers: ->
       @mainLayer = new L.tileLayer(Constants.MAP_MAIN_LAYER, {
         minZoom: 0,
@@ -238,6 +272,12 @@ define [
       @mozillaLayer.getAttribution = ->
         '<a href="https://location.services.mozilla.com/">Mozilla</a> location service'
       #@mozillaLayer.addTo(@leafletMap)
+
+    _initGoogleLayer: ->
+      @googleLayer = new L.LayerGroup()
+      @googleLayer.getAttribution = ->
+        '<a href="https://google.com">Google</a> location'
+      @googleLayer.addTo(@leafletMap)
 
     _initSidebar: ->
       @sidebar = L.control.sidebar('sidebar', {
@@ -285,5 +325,7 @@ define [
           @_updateYandexLayer()
         else if @mozillaLayer == event.layer
           @_updateMozillaLayer()
+        else if @googleLayer == event.layer
+          @_updateGoogleLayer()
 
   return MapView
