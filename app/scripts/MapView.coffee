@@ -80,7 +80,8 @@ define [
         success: (data, textStatus, jqXHR) ->
           hullData = data
         error: (jqXHR, textStatus, errorThrown) ->
-          alert(textStatus)
+          if not (jqXHR.status == 200 and jqXHR.responseText == "")
+            alert(textStatus)
         complete: =>
           @spin(false)
           @coverageHullLayer.clearLayers()
