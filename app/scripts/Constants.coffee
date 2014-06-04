@@ -9,6 +9,7 @@ define [
     @API_YANDEX_CELL_ID_URL: @API_URL + "/v1/cell/location/yandex"
     @API_MOZILLA_CELL_ID_URL: @API_URL + "/v1/cell/location/mozilla"
     @API_GOOGLE_CELL_ID_URL: @API_URL + "/v1/cell/location/google"
+    @API_MAP_POINT_INFO_URL: @API_URL + "/v1/map_info/p"
 
     @MAP_MAIN_LAYER: '/* @echo MAP_MAIN_LAYER */' ||
       "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

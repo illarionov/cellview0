@@ -4,9 +4,10 @@ define [
   'leaflet-sidebar',
   'Constants',
   'CoverageLayer',
+  'PointInfoPopup',
   'spinjs'
   'leaflet-spin'
-], ($, L, leafletSidebar, Constants, CoverageLayer, Spinner, LeafletSpin) ->
+], ($, L, leafletSidebar, Constants, CoverageLayer, PointInfoPopup, Spinner, LeafletSpin) ->
   "use strict"
   class MapView
 
@@ -31,6 +32,7 @@ define [
       @_initSidebar()
       @_initLegend()
       @_initLayerControl()
+      @_pointInfoPopup = new PointInfoPopup(this)
 
     spin: (doSpin) ->
       @leafletMap.spin(doSpin,
@@ -318,7 +320,7 @@ define [
       @layerControl = L.control.layers(mainLayers, optionalLayers)
       @layerControl.addTo(@leafletMap)
 
-      @leafletMap.on 'overlayadd', (event) =>
+      @leafletMap.on 'overlayadd', (event) ->
         if @coverageHullLayer == event.layer
           @_updateCoverageContour()
         else if @openCellIdLayer == event.layer
@@ -329,5 +331,6 @@ define [
           @_updateMozillaLayer()
         else if @googleLayer == event.layer
           @_updateGoogleLayer()
+      , this
 
   return MapView
