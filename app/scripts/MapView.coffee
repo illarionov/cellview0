@@ -42,6 +42,7 @@ define [
 
     setFormControllerRequest: (request) ->
       @_formControllerReq = request
+      @_pointInfoPopup.setFormControllerRequest request
       @_updateCoverage()
       @_updateCoverageContour()
 

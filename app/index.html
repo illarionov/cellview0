@@ -123,6 +123,37 @@
         </div> <!-- /.modal-dialog -->
     </div> <!-- /.modal -->
 
+    <script type="text/template" class="popup_cells_at_point_template">
+        <table class="table table-condensed cells_at_point_list">
+            <caption><%- rc.listTitle %></caption>
+            <thead>
+                <tr>
+                    <th>MCC</th>
+                    <th>MNC</th>
+                    <th>Radio</th>
+                    <th>LAC</th>
+                    <th>PSC</th>
+                    <th>CID</th>
+                    <th>Signal</th>
+                <tr>
+            </thead>
+            <tbody class="list">
+            <% _.each( rc.cells, function( cell ){ %>
+                <tr>
+                    <td><%- cell.mcc %></td>
+                    <td><%- cell.mnc %></td>
+                    <td><%- cell.radio %></td>
+                    <td><%- cell.lac %></td>
+                    <td><%- cell.psc %></td>
+                    <td><%- cell.cid %></td>
+                    <td><%- cell.signal %></td>
+                </tr>
+            <% }); %>
+            </tbody>
+        </table>
+
+    </script>
+
     <!-- build:remove scripts/require.js -->
     <script src="bower_components/requirejs/require.js" data-main=".tmp/development/coffee/config.js"></script>
     <!-- endbuild -->

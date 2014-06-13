@@ -11,6 +11,8 @@ define [
   "use strict"
   class Application
     constructor: ->
+      _.templateSettings.variable = "rc"
+
       @mapView = new MapView()
       $(".nav .btn_toggle_sidebar:first").click => @mapView.sidebar.toggle()
 
