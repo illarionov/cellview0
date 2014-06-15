@@ -138,17 +138,34 @@
                 <tr>
             </thead>
             <tbody class="list">
-            <% _.each( rc.cells, function( cell ){ %>
+            <% pred_mcc = null; pred_mnc=null; pred_radio=null; %>
+            <% for(i=0; i<rc.cells.length; ++i){ %>
+            <% cell = rc.cells[i] %>
                 <tr>
-                    <td><%- cell.mcc %></td>
-                    <td><%- cell.mnc %></td>
-                    <td><%- cell.radio %></td>
-                    <td><%- cell.lac %></td>
-                    <td><%- cell.psc %></td>
-                    <td><%- cell.cid %></td>
-                    <td><%- cell.signal %></td>
+                    <% if (pred_mcc != cell.mcc || (pred_mnc != cell.mnc) || (pred_radio != cell.radio)) { %>
+                        <% pred_mcc=cell.mcc %>
+                        <% pred_mnc=cell.mnc %>
+                        <% pred_radio=cell.radio %>
+
+                        <% row_span = 0 %>
+                        <% for(j=i; (j<rc.cells.length)
+                                && (rc.cells[j].mcc == cell.mcc)
+                                && (rc.cells[j].mnc == cell.mnc)
+                                && (rc.cells[j].radio == cell.radio); ++j) row_span += 1; %>
+                        <td rowspan="<%- row_span %>"><%- cell.mcc %></td>
+                        <td rowspan="<%- row_span %>"><%- cell.mnc %></td>
+                        <td rowspan="<%- row_span %>"><%- cell.radio %></td>
+                    <% } %>
+
+                    <td><span style="display: inline-block; width: 3em; text-align: right"><%- cell.lac %></span></td>
+                    <td><span style="display: inline-block; width: 3em; text-align: right"><%- cell.psc %></span></td>
+                    <td><span style="display: inline-block; width: 5em; text-align: right"><%- cell.cid %></span></td>
+                    <td>
+                        <span style="display: inline-block; width: 2.4em; text-align: right"><%- cell.signal %></span>
+                        <span style="background-color: <%- cell.signal_color || 'white' %>; display: inline-block; width: 6px; float: right;">&nbsp;</span>
+                    </td>
                 </tr>
-            <% }); %>
+            <% } %>
             </tbody>
         </table>
 

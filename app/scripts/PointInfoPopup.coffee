@@ -2,8 +2,9 @@ define [
   'jquery'
   'leaflet',
   'MapView',
+  'SignalGradient',
   'Constants',
-], ($, L, MapView, Constants) ->
+], ($, L, MapView, SignalGradient, Constants) ->
   "use strict"
   class PointInfoPopup
     constructor: (mapView) ->
@@ -68,6 +69,8 @@ define [
         @_popup = null
 
     _showPopup: (latLng, data) ->
+      sg = new SignalGradient()
+      cell['signal_color'] = sg.getColor(cell['signal']) for cell in data
       templateContext =
         listTitle: "#{latLng.lat}, #{latLng.lng}"
         cells: data
